@@ -123,8 +123,3 @@ class DuneAnalytics:
             print(data)
         else:
             print(response.text)
-
-
-
-
-

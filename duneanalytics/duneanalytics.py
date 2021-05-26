@@ -78,6 +78,8 @@ class DuneAnalytics:
         response = self.session.post(session_url)
         if response.status_code == 200:
             self.token = response.json().get('token')
+        else:
+            print(response.text)
 
     def query_result_id(self, query_id):
         """
@@ -98,6 +100,8 @@ class DuneAnalytics:
         if response.status_code == 200:
             data = response.json()
             print(data)
+            if 'error' in data:
+                return None
             result_id = data.get('data').get('get_result').get('result_id')
             return result_id
         else:

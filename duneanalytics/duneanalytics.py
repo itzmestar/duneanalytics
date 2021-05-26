@@ -100,7 +100,7 @@ class DuneAnalytics:
         if response.status_code == 200:
             data = response.json()
             print(data)
-            if 'error' in data:
+            if 'errors' in data:
                 return None
             result_id = data.get('data').get('get_result').get('result_id')
             return result_id

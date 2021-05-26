@@ -124,5 +124,7 @@ class DuneAnalytics:
         if response.status_code == 200:
             data = response.json()
             print(data)
+            return data
         else:
             print(response.text)
+            return {}

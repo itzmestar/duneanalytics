@@ -98,8 +98,11 @@ class DuneAnalytics:
         if response.status_code == 200:
             data = response.json()
             print(data)
+            result_id = data.get('data').get('get_result').get('result_id')
+            return result_id
         else:
             print(response.text)
+            return None
 
     def query_result(self, result_id):
         """

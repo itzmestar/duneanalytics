@@ -5,7 +5,7 @@ from requests import Session
 
 # --------- Constants --------- #
 
-BASE_URL = "https://duneanalytics.com"
+BASE_URL = "https://dune.xyz"
 GRAPH_URL = 'https://core-hsr.duneanalytics.com/v1/graphql'
 
 # --------- Constants --------- #
@@ -30,13 +30,16 @@ class DuneAnalytics:
         self.password = password
         self.session = Session()
         headers = {
-            'origin': BASE_URL,
-            'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,'
+                      'image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'dnt': '1',
+            'sec-ch-ua': '"Google Chrome";v="95", "Chromium";v="95", ";Not A Brand";v="99"',
             'sec-ch-ua-mobile': '?0',
-            'sec-fetch-dest': 'empty',
+            'sec-fetch-dest': 'document',
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-site',
-            'dnt': '1',
+            'origin': BASE_URL,
+            'upgrade-insecure-requests': '1'
         }
         self.session.headers.update(headers)
 

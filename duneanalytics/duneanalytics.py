@@ -127,8 +127,9 @@ class DuneAnalytics:
         response = self.session.post(GRAPH_URL, json=query_data)
         if response.status_code == 200:
             data = response.json()
-            print(data)
-            if 'errors' in data:
+            if 'errors' in data
+                if(self._should_raise_exception(raise_exception)):
+                    raise DuneAnalyticsException("Could not get query result id!", response=response)
                 return None
             result_id = data.get('data').get('get_result').get('result_id')
             return result_id
@@ -157,7 +158,6 @@ class DuneAnalytics:
         response = self.session.post(GRAPH_URL, json=query_data)
         if response.status_code == 200:
             data = response.json()
-            print(data)
             return data
         else:
             if (self._should_raise_exception(raise_exception)):

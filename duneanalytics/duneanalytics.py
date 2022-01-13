@@ -130,8 +130,8 @@ class DuneAnalytics:
         response = self.session.post(GRAPH_URL, json=query_data)
         if response.status_code == 200:
             data = response.json()
-            print(data)
+            # print(data)
             return data
         else:
-            print(response.text)
+            # print(response.text)
             return {}

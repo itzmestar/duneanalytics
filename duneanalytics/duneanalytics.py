@@ -109,11 +109,12 @@ class DuneAnalytics:
                 raise DuneAnalyticsException("Could not get auth token!", response=response)
             print(response.text)
 
-    def query_result_id(self, query_id, raise_exception=None):
+    def query_result_id(self, query_id, parameters=None, raise_exception=None):
         """
         Fetch the query result id for a query
 
         :param query_id: provide the query_id
+        :param parameters: Array of {key, type, value}. For example, {key: "NFT Contract", type: "text", value: "0xBD4455dA5929D5639EE098ABFaa3241e9ae111Af"}
         :return:
         """
         query_data = {"operationName": "GetResult", "variables": {"query_id": query_id},
@@ -121,6 +122,8 @@ class DuneAnalytics:
                                "{\n  get_result(query_id: $query_id, parameters: $parameters) "
                                "{\n    job_id\n    result_id\n    __typename\n  }\n}\n"
                       }
+        if parameters is not None:
+            query_data["variables"].update({ "parameters": parameters })
 
         self.session.headers.update({'authorization': f'Bearer {self.token}'})
 

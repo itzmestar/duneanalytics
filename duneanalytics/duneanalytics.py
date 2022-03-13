@@ -122,7 +122,7 @@ class DuneAnalytics:
                                "{\n  get_result(query_id: $query_id, parameters: $parameters) "
                                "{\n    job_id\n    result_id\n    __typename\n  }\n}\n"
                       }
-        if parameters is not None:
+        if parameters is not None and len(parameters) > 0:
             query_data["variables"].update({ "parameters": parameters })
 
         self.session.headers.update({'authorization': f'Bearer {self.token}'})

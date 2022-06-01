@@ -143,6 +143,40 @@ class DuneAnalytics:
             print(response.text)
             return None
 
+    def query_result_id_v2(self, query_id, parameters=None, raise_exception=None):
+        """
+        Fetch the query result id for a query
+
+        :param query_id: provide the query_id
+        :param parameters: Array of {key, type, value}. For example, {key: "NFT Contract", type: "text", value: "0xBD4455dA5929D5639EE098ABFaa3241e9ae111Af"}
+        :return:
+        """
+        query_data = {"operationName": "GetResult", "variables": {"query_id": query_id},
+                      "query": "query GetResult($query_id: Int!, $parameters: [Parameter!]) "
+                               "{\n  get_result_v2(query_id: $query_id, parameters: $parameters) "
+                               "{\n    job_id\n    result_id\n    error_id\n    __typename\n  }\n}\n"
+                      }
+        if parameters is not None and len(parameters) > 0:
+            query_data["variables"].update({ "parameters": parameters })
+
+        self.session.headers.update({'authorization': f'Bearer {self.token}'})
+
+        response = self.session.post(GRAPH_URL, json=query_data)
+        if response.status_code == 200:
+            data = response.json()
+            # print(data)
+            if 'errors' in data:
+                if(self._should_raise_exception(raise_exception)):
+                    raise DuneAnalyticsException("Could not get query result id!", response=response)
+                return None
+            result_id = data.get('data').get('get_result').get('result_id')
+            return result_id
+        else:
+            if (self._should_raise_exception(raise_exception)):
+                raise DuneAnalyticsException("Could not get query result id!", response=response)
+            print(response.text)
+            return None
+
     def query_result(self, result_id, raise_exception=None):
         """
         Fetch the result for a query

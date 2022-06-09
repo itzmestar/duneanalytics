@@ -74,9 +74,9 @@ dune.fetch_auth_token()
 # fetch query result id using query id
 # query id for any query can be found from the url of the query:
 # for example: 
-# https://duneanalytics.com/queries/4494/8769 => 4494
-# https://duneanalytics.com/queries/3705/7192 => 3705
-# https://duneanalytics.com/queries/3751/7276 => 3751
+# https://dune.com/queries/4494/8769 => 4494
+# https://dune.com/queries/3705/7192 => 3705
+# https://dune.com/queries/3751/7276 => 3751
 
 result_id = dune.query_result_id(query_id=5508)
 

@@ -5,7 +5,7 @@ from requests import Session
 
 # --------- Constants --------- #
 
-BASE_URL = "https://dune.xyz"
+BASE_URL = "https://dune.com"
 GRAPH_URL = 'https://core-hsr.duneanalytics.com/v1/graphql'
 
 # --------- Constants --------- #
@@ -93,8 +93,8 @@ class DuneAnalytics:
         """
         query_data = {"operationName": "GetResult", "variables": {"query_id": query_id},
                       "query": "query GetResult($query_id: Int!, $parameters: [Parameter!]) "
-                               "{\n  get_result(query_id: $query_id, parameters: $parameters) "
-                               "{\n    job_id\n    result_id\n    __typename\n  }\n}\n"
+                               "{\n  get_result_v2(query_id: $query_id, parameters: $parameters) "
+                               "{\n    job_id\n    result_id\n    error_id\n    __typename\n  }\n}\n"
                       }
 
         self.session.headers.update({'authorization': f'Bearer {self.token}'})
@@ -105,7 +105,7 @@ class DuneAnalytics:
             print(data)
             if 'errors' in data:
                 return None
-            result_id = data.get('data').get('get_result').get('result_id')
+            result_id = data.get('data').get('get_result_v2').get('result_id')
             return result_id
         else:
             print(response.text)
@@ -118,10 +118,12 @@ class DuneAnalytics:
         :return:
         """
         query_data = {"operationName": "FindResultDataByResult",
-                      "variables": {"result_id": result_id},
-                      "query": "query FindResultDataByResult($result_id: uuid!) "
+                      "variables": {"result_id": result_id, "error_id": "00000000-0000-0000-0000-000000000000"},
+                      "query": "query FindResultDataByResult($result_id: uuid!, $error_id: uuid!) "
                                "{\n  query_results(where: {id: {_eq: $result_id}}) "
-                               "{\n    id\n    job_id\n    error\n    runtime\n    generated_at\n    columns\n    __typename\n  }"
+                               "{\n    id\n    job_id\n    runtime\n    generated_at\n    columns\n    __typename\n  }"
+                               "\n  query_errors(where: {id: {_eq: $error_id}}) {\n    id\n    job_id\n    runtime\n"
+                               "    message\n    metadata\n    type\n    generated_at\n    __typename\n  }\n"
                                "\n  get_result_by_result_id(args: {want_result_id: $result_id}) {\n    data\n    __typename\n  }\n}\n"
                       }
 

@@ -2,6 +2,7 @@
 """This provides the DuneAnalytics class implementation"""
 
 from requests import Session
+import logging
 
 # --------- Constants --------- #
 
@@ -9,6 +10,11 @@ BASE_URL = "https://dune.com"
 GRAPH_URL = 'https://core-hsr.duneanalytics.com/v1/graphql'
 
 # --------- Constants --------- #
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s : %(levelname)s : %(funcName)-9s : %(message)s'
+)
+logger = logging.getLogger("dune")
 
 
 class DuneAnalytics:
@@ -70,6 +76,8 @@ class DuneAnalytics:
 
         self.session.post(auth_url, data=form_data)
         self.auth_refresh = self.session.cookies.get('auth-refresh')
+        if self.auth_refresh is None:
+            logger.warning("Login Failed!")
 
     def fetch_auth_token(self):
         """
@@ -81,8 +89,10 @@ class DuneAnalytics:
         response = self.session.post(session_url)
         if response.status_code == 200:
             self.token = response.json().get('token')
+            if self.token is None:
+                logger.warning("Fetching Token Failed!")
         else:
-            print(response.text)
+            logger.error(response.text)
 
     def query_result_id(self, query_id):
         """
@@ -102,13 +112,14 @@ class DuneAnalytics:
         response = self.session.post(GRAPH_URL, json=query_data)
         if response.status_code == 200:
             data = response.json()
-            print(data)
+            logger.debug(data)
             if 'errors' in data:
+                logger.error(data.get('errors'))
                 return None
             result_id = data.get('data').get('get_result_v2').get('result_id')
             return result_id
         else:
-            print(response.text)
+            logger.error(response.text)
             return None
 
     def query_result(self, result_id):
@@ -132,8 +143,8 @@ class DuneAnalytics:
         response = self.session.post(GRAPH_URL, json=query_data)
         if response.status_code == 200:
             data = response.json()
-            print(data)
+            logger.debug(data)
             return data
         else:
-            print(response.text)
+            logger.error(response.text)
             return {}

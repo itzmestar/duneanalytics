@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- #
 """This provides the DuneAnalytics class implementation"""
 
+from datetime import datetime
 from requests import Session
 import logging
 
@@ -148,3 +149,67 @@ class DuneAnalytics:
         else:
             logger.error(response.text)
             return {}
+
+    def force_query_update(self, query_id):
+        """
+        Force a query to update
+        :param query_id: query id
+        :return: Job ID if successful, None otherwise
+        """
+        query_data = {
+            "operationName": "ExecuteQuery",
+            "variables": {"query_id": query_id, "parameters": []},
+            "query": "mutation ExecuteQuery($query_id: Int!, $parameters: [Parameter!]!) "
+            "{\n  execute_query(query_id: $query_id, parameters: $parameters) "
+            "{\n    job_id\n    __typename\n  }\n}\n",
+        }
+        self.session.headers.update({"authorization": f"Bearer {self.token}"})
+
+        response = self.session.post(GRAPH_URL, json=query_data)
+        if response.status_code == 200:
+            data = response.json()
+            if "errors" in data:
+                raise Exception(
+                    f"{data.get('errors')[0].get('message')}\nCode: {data.get('errors')[0].get('extensions').get('code')}"
+                )
+            job_id = data.get("data").get("execute_query").get("job_id")
+            return job_id
+        else:
+            print(response.text)
+            return None
+
+    def job_result(self, job_id):
+        """
+        Fetch the result for a job
+        :param job_id: job id
+        :return: Job status        
+        """
+
+        query_data = {
+            "operationName": "FindResultJob",
+            "variables": {"job_id": job_id},
+            "query": "query FindResultJob($job_id: uuid) {\n  jobs(where: {id: {_eq: $job_id}}) "
+            "{\n    id\n    user_id\n    locked_until\n    created_at\n    category\n    __typename\n  }"
+            "\n  view_queue_positions(where: {id: {_eq: $job_id}}) {\n    pos\n    __typename\n  }\n}\n",
+        }
+        self.session.headers.update({"authorization": f"Bearer {self.token}"})
+
+        response = self.session.post(GRAPH_URL, json=query_data)
+        if response.status_code == 200:
+            data = response.json()
+            if "errors" in data:
+                return data.get("errors")
+            jobs_result = data.get("data").get("jobs")
+            queue_position_result = data.get("data").get("view_queue_positions")
+
+            if len(jobs_result) == 0 and len(queue_position_result) == 0:
+                return "Job executed"
+            else:
+                lock_time = jobs_result[0].get("locked_until")
+                if lock_time:
+                    lock_time = datetime.strptime(lock_time, "%Y-%m-%dT%H:%M:%S.%f%z")
+                    lock_time = datetime.strftime(lock_time, "%Y-%m-%d %H:%M:%S %Z")
+                    return f"Job {job_id} locked until {lock_time}"
+        else:
+            print(response.text)
+            return None

@@ -7,7 +7,7 @@ import logging
 # --------- Constants --------- #
 
 BASE_URL = "https://dune.com"
-GRAPH_URL = 'https://core-hsr.duneanalytics.com/v1/graphql'
+GRAPH_URL = 'https://core-hsr.dune.com/v1/graphql'
 
 # --------- Constants --------- #
 logging.basicConfig(

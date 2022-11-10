@@ -1,11 +1,12 @@
 import pytest
 
 
-@pytest.mark.usefixtures('dune')
+@pytest.mark.usefixtures("dune")
 class TestDuneAnalytics:
     """
     Class to test DuneAnalytics
     """
+
     def test_login(self, dune):
         # try to login
         dune.login()

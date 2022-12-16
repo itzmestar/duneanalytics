@@ -8,6 +8,7 @@ import logging
 
 BASE_URL = "https://dune.com"
 GRAPH_URL = 'https://core-hsr.dune.com/v1/graphql'
+GRAPH_URL_NEW = 'https://app-api.dune.com/v1/graphql'
 
 # --------- Constants --------- #
 logging.basicConfig(
@@ -34,6 +35,7 @@ class DuneAnalytics:
         self.token = None
         self.username = username
         self.password = password
+        self.query_id = None
         self.session = Session()
         headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,'
@@ -122,6 +124,35 @@ class DuneAnalytics:
             logger.error(response.text)
             return None
 
+    def query_result_id_v3(self, query_id):
+        """
+        Fetch the query result id for a query
+
+        :param query_id: provide the query_id
+        :return:
+        """
+        self.query_id = query_id
+        query_data = {"operationName": "GetResult", "variables": {"query_id": query_id, "parameters": []},
+                      "query": "query GetResult($query_id: Int!, $parameters: [Parameter!]!) "
+                               "{\n  get_result_v3(query_id: $query_id, parameters: $parameters) "
+                               "{\n    job_id\n    result_id\n    error_id\n    __typename\n  }\n}\n"
+                      }
+
+        self.session.headers.update({'authorization': f'Bearer {self.token}'})
+
+        response = self.session.post(GRAPH_URL, json=query_data)
+        if response.status_code == 200:
+            data = response.json()
+            logger.debug(data)
+            if 'errors' in data:
+                logger.error(data.get('errors'))
+                return None
+            result_id = data.get('data').get('get_result_v3').get('result_id')
+            return result_id
+        else:
+            logger.error(response.text)
+            return None
+
     def query_result(self, result_id):
         """
         Fetch the result for a query
@@ -141,6 +172,31 @@ class DuneAnalytics:
         self.session.headers.update({'authorization': f'Bearer {self.token}'})
 
         response = self.session.post(GRAPH_URL, json=query_data)
+        if response.status_code == 200:
+            data = response.json()
+            logger.debug(data)
+            return data
+        else:
+            logger.error(response.text)
+            return {}
+
+    def get_execution_result(self, execution_id):
+        query_data = {"operationName": "GetExecution",
+                      "variables": {"execution_id": execution_id, "query_id": self.query_id, "parameters": []},
+                      "query": "query GetExecution($execution_id: String!, $query_id: Int!, $parameters: [Parameter!]!)"
+                               " {\n  get_execution(\n    execution_id: $execution_id\n    query_id: $query_id\n    "
+                               "parameters: $parameters\n  ) {\n    execution_queued {\n      execution_id\n      "
+                               "execution_user_id\n      position\n      execution_type\n      created_at\n      "
+                               "__typename\n    }\n    execution_running {\n      execution_id\n      "
+                               "execution_user_id\n      execution_type\n      started_at\n      created_at\n      "
+                               "__typename\n    }\n    execution_succeeded {\n      execution_id\n      "
+                               "runtime_seconds\n      generated_at\n      columns\n      data\n      __typename\n    }"
+                               "\n    execution_failed {\n      execution_id\n      type\n      message\n      metadata"
+                               " {\n        line\n        column\n        hint\n        __typename\n      }\n      "
+                               "runtime_seconds\n      generated_at\n      __typename\n    }\n    __typename\n  }\n}\n"}
+        self.session.headers.update({'authorization': f'Bearer {self.token}'})
+
+        response = self.session.post(GRAPH_URL_NEW, json=query_data)
         if response.status_code == 200:
             data = response.json()
             logger.debug(data)

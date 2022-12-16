@@ -82,4 +82,14 @@ result_id = dune.query_result_id(query_id=5508)
 
 # fetch query result
 data = dune.query_result(result_id)
+
+For some queries above might not work specially if using v3. Try to use below in that case:
+# for example: 
+# https://dune.com/queries/1105079
+
+result_id = dune.query_result_id_v3(query_id=1105079)
+
+# fetch execution result
+data = dune.get_execution_result(result_id)
+
 ```

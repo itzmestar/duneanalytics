@@ -34,3 +34,11 @@ class TestDuneAnalytics:
         assert result_id is not None
         data = dune.query_result(result_id)
         assert data is not None
+
+    def test_get_execution_result(self, dune):
+        result_id = dune.query_result_id_v3(query_id=1105079)
+        assert result_id is not None
+        data = dune.get_execution_result(result_id)
+        assert data is not None
+        assert data.get('get_execution') is not None
+        assert data.get('get_execution', {}).get('execution_succeeded') is not None

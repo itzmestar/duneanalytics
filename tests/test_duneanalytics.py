@@ -23,12 +23,12 @@ class TestDuneAnalytics:
         assert dune.password is not None
         assert dune.token is not None
 
-    # @pytest.mark.skip(reason='To be implemented')
+    @pytest.mark.skip(reason='To be implemented')
     def test_query_result_id(self, dune):
-        result_id = dune.query_result_id(query_id=3751)
+        result_id = dune.query_result_id(query_id=3705)
         assert result_id is not None
 
-    # @pytest.mark.skip(reason='To be implemented')
+    @pytest.mark.skip(reason='To be implemented')
     def test_query_result(self, dune):
         result_id = dune.query_result_id(query_id=3705)
         assert result_id is not None
@@ -40,5 +40,5 @@ class TestDuneAnalytics:
         assert result_id is not None
         data = dune.get_execution_result(result_id)
         assert data is not None
-        assert data.get('get_execution') is not None
-        assert data.get('get_execution', {}).get('execution_succeeded') is not None
+        assert data.get('data', {}).get('get_execution') is not None
+        assert data.get('data', {}).get('get_execution', {}).get('execution_succeeded') is not None
